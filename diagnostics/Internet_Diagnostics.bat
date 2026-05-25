@@ -24,8 +24,16 @@ set "ACTIVE_ALIAS="
 set "ACTIVE_IP="
 set "ACTIVE_GW="
 set "ACTIVE_PREFIX="
+set "MAX_SCAN_HOSTS=64"
 
-for /f "usebackq delims=" %%I in (`powershell -NoProfile -Command "$cfg=Get-NetIPConfiguration ^| Where-Object { $_.IPv4Address -and $_.IPv4DefaultGateway -and $_.NetAdapter.Status -eq 'Up' } ^| Select-Object -First 1; if($cfg){'ALIAS=' + $cfg.InterfaceAlias; 'IP=' + $cfg.IPv4Address.IPAddress; 'GW=' + $cfg.IPv4DefaultGateway.NextHop; 'PREFIX=' + $cfg.IPv4Address.PrefixLength}"`) do (
+for /f "usebackq delims=" %%I in (`powershell -NoProfile -Command ^
+  "$cfg=Get-NetIPConfiguration | Where-Object { $_.IPv4Address -and $_.IPv4DefaultGateway -and $_.NetAdapter.Status -eq 'Up' } | Select-Object -First 1;" ^
+  "if($cfg){" ^
+  "'ALIAS=' + $cfg.InterfaceAlias;" ^
+  "'IP=' + $cfg.IPv4Address.IPAddress;" ^
+  "'GW=' + $cfg.IPv4DefaultGateway.NextHop;" ^
+  "'PREFIX=' + $cfg.IPv4Address.PrefixLength;" ^
+  "}"`) do (
   for /f "tokens=1* delims==" %%A in ("%%I") do (
     if /I "%%A"=="ALIAS" set "ACTIVE_ALIAS=%%B"
     if /I "%%A"=="IP" set "ACTIVE_IP=%%B"
@@ -38,6 +46,12 @@ set "EXIT_CODE=0"
 if not defined ACTIVE_IP (
   call "%COMMON_LIB%" :Print ERROR "No active IPv4 adapter with default gateway found."
   set "EXIT_CODE=1"
+) else if not defined ACTIVE_GW (
+  call "%COMMON_LIB%" :Print ERROR "Active adapter detected but default gateway is missing."
+  set "EXIT_CODE=1"
+) else if not defined ACTIVE_PREFIX (
+  call "%COMMON_LIB%" :Print ERROR "Active adapter detected but IPv4 prefix length is missing."
+  set "EXIT_CODE=1"
 ) else (
   > "%RPT_TXT%" (
     echo Internet Diagnostics Report
@@ -47,6 +61,7 @@ if not defined ACTIVE_IP (
     echo Local IPv4: %ACTIVE_IP%
     echo Default Gateway: %ACTIVE_GW%
     echo Prefix Length: %ACTIVE_PREFIX%
+    echo Local scan host limit: %MAX_SCAN_HOSTS%
     echo.
   )
   call "%COMMON_LIB%" :Print INFO "Using active adapter: %ACTIVE_ALIAS% ^(%ACTIVE_IP%/%ACTIVE_PREFIX%^) via %ACTIVE_GW%"
@@ -93,8 +108,33 @@ if not defined ACTIVE_IP (
   ) >> "%RPT_TXT%" 2>> "%LOG_FILE%" & call "%COMMON_LIB%" :RecordResult "Trace internet route" %errorlevel%
   if errorlevel 1 set "EXIT_CODE=1"
 
-  powershell -NoProfile -Command "$ip=[System.Net.IPAddress]::Parse('%ACTIVE_IP%');$prefix=[int]'%ACTIVE_PREFIX%';$bytes=$ip.GetAddressBytes();[Array]::Reverse($bytes);$ipInt=[BitConverter]::ToUInt32($bytes,0);$hostBits=32-$prefix;if($hostBits -lt 0){$hostBits=0};$maxHosts=[Math]::Pow(2,$hostBits)-2;if($maxHosts -lt 1){$maxHosts=1};$scanCount=[Math]::Min([int]$maxHosts,64);$mask=if($prefix -eq 0){[uint32]0}else{([uint32]::MaxValue -shl (32-$prefix))};$network=$ipInt -band $mask;'Target subnet: ' + $ip.ToString() + '/' + $prefix;'Host scan limit: ' + $scanCount;for($i=1;$i -le $scanCount;$i++){ $targetInt=$network + [uint32]$i; $targetBytes=[BitConverter]::GetBytes($targetInt); [Array]::Reverse($targetBytes); $target=[System.Net.IPAddress]::new($targetBytes).ToString(); if($target -eq $ip.ToString()){continue}; if(Test-Connection -ComputerName $target -Count 1 -Quiet -TimeoutSeconds 1){'UP  ' + $target} }" > "%SCAN_RPT%" 2>> "%LOG_FILE%" & call "%COMMON_LIB%" :RecordResult "Scan active local subnet (targeted)" %errorlevel%
-  if errorlevel 1 set "EXIT_CODE=1"
+  call "%COMMON_LIB%" :Print INFO "Running targeted active-subnet scan."
+  powershell -NoProfile -Command ^
+    "try{" ^
+    "$ip=[System.Net.IPAddress]::Parse('%ACTIVE_IP%');" ^
+    "$prefix=[int]'%ACTIVE_PREFIX%';" ^
+    "if($prefix -lt 1 -or $prefix -gt 32){throw 'Invalid IPv4 prefix length: ' + $prefix};" ^
+    "$bytes=$ip.GetAddressBytes(); [Array]::Reverse($bytes);" ^
+    "$ipInt=[BitConverter]::ToUInt32($bytes,0);" ^
+    "$hostBits=32-$prefix;" ^
+    "$maxUsableHosts=[int]([Math]::Pow(2,$hostBits)-2);" ^
+    "$scanCount=if($maxUsableHosts -gt 0){[Math]::Min($maxUsableHosts,[int]'%MAX_SCAN_HOSTS%')}else{0};" ^
+    "$mask=if($prefix -eq 32){[uint32]::MaxValue}else{([uint32]::MaxValue -shl (32-$prefix))};" ^
+    "$network=$ipInt -band $mask;" ^
+    "'Target subnet: ' + $ip.ToString() + '/' + $prefix;" ^
+    "'Host scan limit: ' + $scanCount;" ^
+    "if($scanCount -eq 0){'No usable peer hosts available in this subnet for scan.'; return};" ^
+    "for($i=1;$i -le $scanCount;$i++){" ^
+    "$targetInt=$network + [uint32]$i;" ^
+    "$targetBytes=[BitConverter]::GetBytes($targetInt); [Array]::Reverse($targetBytes);" ^
+    "$target=[System.Net.IPAddress]::new($targetBytes).ToString();" ^
+    "if($target -eq $ip.ToString() -or $target -eq '%ACTIVE_GW%'){continue};" ^
+    "if(Test-Connection -ComputerName $target -Count 1 -Quiet -TimeoutSeconds 1){'UP ' + $target}" ^
+    "}" ^
+    "}catch{Write-Error ('Local subnet scan failed: ' + $_.Exception.Message); exit 1}" > "%SCAN_RPT%" 2>> "%LOG_FILE%"
+  set "SCAN_EXIT_CODE=%errorlevel%"
+  call "%COMMON_LIB%" :RecordResult "Scan active local subnet (targeted)" %SCAN_EXIT_CODE%
+  if not "%SCAN_EXIT_CODE%"=="0" set "EXIT_CODE=1"
   (
     echo === Local subnet scan summary ===
     type "%SCAN_RPT%"
