@@ -199,6 +199,22 @@ if not exist "%TARGET%" (
   timeout /t 2 >nul
   exit /b 1
 )
+set "TOOL_DESC="
+for /f "tokens=1* delims=:" %%A in ('findstr /b /c:"REM Description:" "%TARGET%"') do set "TOOL_DESC=%%B"
+if defined TOOL_DESC if "!TOOL_DESC:~0,1!"==" " set "TOOL_DESC=!TOOL_DESC:~1!"
+echo.
+echo ================= EXECUTION CONFIRMATION =================
+echo Tool: %~1
+if defined TOOL_DESC (
+  echo Purpose: !TOOL_DESC!
+) else (
+  echo Purpose: Runs the selected maintenance operation.
+)
+choice /c YN /n /m "Continue? [Y]es / [N]o: "
+if errorlevel 2 (
+  call "%COMMON_LIB%" :Print WARN "Cancelled %~1 by user choice."
+  exit /b 0
+)
 call "%COMMON_LIB%" :Print INFO "Launching %~1"
 call "%TARGET%"
 exit /b 0
