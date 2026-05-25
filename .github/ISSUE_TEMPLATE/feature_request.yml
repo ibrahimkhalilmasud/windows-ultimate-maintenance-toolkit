@@ -1,0 +1,23 @@
+name: Feature request
+description: Suggest a new toolkit capability
+title: "[Feature]: "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem statement
+      description: What problem should this feature solve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+    validations:
+      required: true
+  - type: textarea
+    id: risk
+    attributes:
+      label: Security or operational risks
+      description: List possible impacts and mitigations.
