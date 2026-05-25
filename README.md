@@ -9,6 +9,7 @@ This repository provides a modular, production-grade toolkit for Windows 10/11 a
 
 ## Features
 - Central launcher dashboard with category navigation
+- Per-tool confirmation prompt showing what the selected script does
 - Admin auto-elevation and safety-focused script design
 - Centralized timestamped logging in `logs/`
 - Automated TXT/HTML report generation in `reports/`

@@ -194,12 +194,29 @@ goto :category_network
 
 :RunTool
 set "TARGET=%TOOLKIT_ROOT%\%~1"
+set "TOOL_PATH=%~1"
 if not exist "%TARGET%" (
   call "%COMMON_LIB%" :Print ERROR "Tool not found: %TARGET%"
   timeout /t 2 >nul
   exit /b 1
 )
-call "%COMMON_LIB%" :Print INFO "Launching %~1"
+set "TOOL_DESC="
+for /f "tokens=1* delims=:" %%A in ('findstr /b /c:"REM Description:" "%TARGET%" 2^>nul') do set "TOOL_DESC=%%B"
+if defined TOOL_DESC for /f "tokens=* delims= " %%D in ("!TOOL_DESC!") do set "TOOL_DESC=%%D"
+echo.
+echo ================= EXECUTION CONFIRMATION =================
+echo Tool: !TOOL_PATH!
+if defined TOOL_DESC (
+  echo Purpose: !TOOL_DESC!
+) else (
+  echo Purpose: Runs the selected maintenance operation.
+)
+choice /c YN /n /m "Continue? [Y]es / [N]o: "
+if errorlevel 2 (
+  call "%COMMON_LIB%" :Print WARN "Cancelled !TOOL_PATH! by user choice."
+  exit /b 0
+)
+call "%COMMON_LIB%" :Print INFO "Launching !TOOL_PATH!"
 call "%TARGET%"
 exit /b 0
 
