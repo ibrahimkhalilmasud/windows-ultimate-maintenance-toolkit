@@ -8,6 +8,10 @@ Provides a focused maintenance operation for the **Internet_Diagnostics** workfl
 - Timestamped centralized logging in `logs/`
 - Result summary entry generation in `reports/`
 - Safety-first command execution with status output
+- Active-adapter detection (uses current IPv4 + default gateway)
+- Gateway reachability test to validate local network path first
+- DNS resolution and internet reachability checks
+- Targeted local subnet scan on the active network (bounded for speed)
 
 ## Requirements
 - Windows 10/11

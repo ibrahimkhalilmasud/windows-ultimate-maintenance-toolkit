@@ -7,6 +7,7 @@ goto %~1
 set "TOOL_NAME=%~2"
 set "TOOL_VERSION=%~3"
 set "TOOLKIT_ROOT=%~f4"
+color 0A >nul 2>&1
 if not defined TOOLKIT_ROOT set "TOOLKIT_ROOT=%~dp0.."
 for %%I in ("%TOOLKIT_ROOT%") do set "TOOLKIT_ROOT=%%~fI"
 set "LOG_DIR=%TOOLKIT_ROOT%\logs"
@@ -60,11 +61,11 @@ set "LEVEL=%~2"
 set "MESSAGE=%~3"
 set "PREFIX=[!LEVEL!]"
 if "%COLOR_OK%"=="1" (
-  set "COLOR=37"
+  set "COLOR=92"
   if /I "!LEVEL!"=="SUCCESS" set "COLOR=92"
   if /I "!LEVEL!"=="WARN" set "COLOR=93"
   if /I "!LEVEL!"=="ERROR" set "COLOR=91"
-  if /I "!LEVEL!"=="INFO" set "COLOR=96"
+  if /I "!LEVEL!"=="INFO" set "COLOR=92"
   echo !ESC![!COLOR!m!PREFIX! !MESSAGE!!ESC![0m
 ) else (
   echo !PREFIX! !MESSAGE!
