@@ -61,6 +61,7 @@ for /f "tokens=1* delims=|" %%A in ("!ENTRY!") do (
   set "SC_CMD=%%B"
 )
 call "%COMMON_LIB%" :Print INFO "Opening !SC_NAME!"
+REM Security assumption: SC_CMD values are trusted and hardcoded in :LoadShortcuts.
 start "" !SC_CMD!
 call "%COMMON_LIB%" :Print INFO "Launch command issued for !SC_NAME!."
 exit /b 0
@@ -128,7 +129,7 @@ set "SHORTCUT_59=Startup Folder (All Users)|explorer shell:common startup"
 set "SHORTCUT_60=Downloads Folder|explorer shell:Downloads"
 set "SHORTCUT_61=Documents Folder|explorer shell:Personal"
 set "SHORTCUT_62=Pictures Folder|explorer shell:My Pictures"
-set "SHORTCUT_63=Videos Folder|explorer %USERPROFILE%\Videos"
+set "SHORTCUT_63=Videos Folder|explorer shell:My Video"
 set "SHORTCUT_64=Music Folder|explorer shell:My Music"
 set "SHORTCUT_65=Recycle Bin|explorer shell:RecycleBinFolder"
 set "SHORTCUT_66=Apps Folder|explorer shell:AppsFolder"
