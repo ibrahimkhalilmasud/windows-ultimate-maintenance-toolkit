@@ -81,11 +81,24 @@ exit /b %LAUNCH_CODE%
 
 :ValidateShortcuts
 set "MISSING_SHORTCUTS="
+set "UNSAFE_SHORTCUTS="
 for /l %%I in (1,1,100) do (
-  if not defined SHORTCUT_%%I set "MISSING_SHORTCUTS=!MISSING_SHORTCUTS! %%I"
+  if not defined SHORTCUT_%%I (
+    set "MISSING_SHORTCUTS=!MISSING_SHORTCUTS! %%I"
+  ) else (
+    for /f "tokens=1* delims=|" %%A in ("!SHORTCUT_%%I!") do set "SCMD_CHECK=%%B"
+    if not defined SCMD_CHECK set "UNSAFE_SHORTCUTS=!UNSAFE_SHORTCUTS! %%I"
+    if not "!SCMD_CHECK:&=!"=="!SCMD_CHECK!" set "UNSAFE_SHORTCUTS=!UNSAFE_SHORTCUTS! %%I"
+    if not "!SCMD_CHECK:;=!"=="!SCMD_CHECK!" set "UNSAFE_SHORTCUTS=!UNSAFE_SHORTCUTS! %%I"
+    if not "!SCMD_CHECK:\"=!"=="!SCMD_CHECK!" set "UNSAFE_SHORTCUTS=!UNSAFE_SHORTCUTS! %%I"
+  )
 )
 if defined MISSING_SHORTCUTS (
   call "%COMMON_LIB%" :Print ERROR "Shortcut table is incomplete. Missing entries:!MISSING_SHORTCUTS!"
+  exit /b 1
+)
+if defined UNSAFE_SHORTCUTS (
+  call "%COMMON_LIB%" :Print ERROR "Shortcut table contains unsafe command entries:!UNSAFE_SHORTCUTS!"
   exit /b 1
 )
 call "%COMMON_LIB%" :Print INFO "Shortcut table integrity check passed (100/100)."
