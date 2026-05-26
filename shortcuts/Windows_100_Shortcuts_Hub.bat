@@ -36,10 +36,8 @@ set "SEL="
 set /p "SEL=Select shortcut: "
 
 if "%SEL%"=="0" goto :done
-echo(%SEL%| findstr /r "^[0-9][0-9]*$" >nul || goto :invalid
+echo(%SEL%| findstr /r "^[1-9][0-9]?$ ^100$" >nul || goto :invalid
 set /a "NUM=%SEL%+0"
-if %NUM% LSS 1 goto :invalid
-if %NUM% GTR 100 goto :invalid
 
 call :LaunchShortcut %NUM%
 echo.
@@ -63,8 +61,12 @@ for /f "tokens=1* delims=|" %%A in ("!ENTRY!") do (
 )
 call "%COMMON_LIB%" :Print INFO "Opening !SC_NAME!"
 start "" !SC_CMD!
-call "%COMMON_LIB%" :RecordResult "Open !SC_NAME!" %errorlevel%
-exit /b %errorlevel%
+if errorlevel 1 (
+  call "%COMMON_LIB%" :Print ERROR "Failed to request launch for !SC_NAME!."
+  exit /b 1
+)
+call "%COMMON_LIB%" :Print SUCCESS "Launch request sent for !SC_NAME!."
+exit /b 0
 
 :LoadShortcuts
 set "SHORTCUT_1=Task Manager|taskmgr"

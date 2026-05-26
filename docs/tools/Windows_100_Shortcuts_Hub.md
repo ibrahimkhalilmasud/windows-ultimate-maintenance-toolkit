@@ -24,7 +24,7 @@ Provides a centralized quick-launch menu for **100 built-in Windows shortcut too
 - Console success/failure indicators
 - Script-specific `.log` file in `logs/`
 - Summary entry in `reports/`
-- Selected utility or settings page opens
+- Selected utility or settings page receives a launch request
 
 ## Warnings
 - This tool launches utilities only; review each utility before making changes.
