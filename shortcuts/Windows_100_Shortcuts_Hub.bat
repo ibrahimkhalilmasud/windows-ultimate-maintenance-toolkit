@@ -66,7 +66,7 @@ goto :menu
 :LaunchShortcut
 set "ENTRY=!SHORTCUT_%~1!"
 if not defined ENTRY (
-  call "%COMMON_LIB%" :Print ERROR "Shortcut %~1 is not configured."
+  call "%COMMON_LIB%" :Print ERROR "Internal error: Shortcut %~1 is not configured in the shortcut table."
   exit /b 1
 )
 for /f "tokens=1* delims=|" %%A in ("!ENTRY!") do (
@@ -175,7 +175,7 @@ set "SHORTCUT_55=Network and Sharing Center|control /name Microsoft.NetworkAndSh
 set "SHORTCUT_56=File Explorer|explorer"
 set "SHORTCUT_57=This PC|explorer shell:MyComputerFolder"
 set "SHORTCUT_58=Startup Folder (Current User)|explorer shell:startup"
-set "SHORTCUT_59=Startup Folder (All Users)|explorer shell:common startup"
+set "SHORTCUT_59=Startup Folder (All Users)|explorer shell:Common Startup"
 set "SHORTCUT_60=Downloads Folder|explorer shell:Downloads"
 set "SHORTCUT_61=Documents Folder|explorer shell:Personal"
 set "SHORTCUT_62=Pictures Folder|explorer shell:My Pictures"
