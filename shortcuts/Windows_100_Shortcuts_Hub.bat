@@ -18,6 +18,7 @@ if errorlevel 1 exit /b 0
 
 call "%COMMON_LIB%" :Print INFO "Starting Windows_100_Shortcuts_Hub"
 call :LoadShortcuts
+set "EXIT_CODE=0"
 
 :menu
 cls
@@ -36,13 +37,17 @@ set "SEL="
 set /p "SEL=Select shortcut: "
 
 if "%SEL%"=="0" goto :done
-echo(%SEL%| findstr /r "^[0-9][0-9]*$" >nul || goto :invalid
-if "%SEL:~0,1%"=="0" goto :invalid
+echo(%SEL%| findstr /r "^[1-9][0-9]*$" >nul || goto :invalid
 set /a "NUM=%SEL%+0"
 if %NUM% LSS 1 goto :invalid
 if %NUM% GTR 100 goto :invalid
 
 call :LaunchShortcut %NUM%
+set "LAST_CODE=%errorlevel%"
+if not "%LAST_CODE%"=="0" (
+  set "EXIT_CODE=1"
+  call "%COMMON_LIB%" :Print ERROR "Shortcut launch request failed."
+)
 echo.
 pause
 goto :menu
@@ -172,7 +177,6 @@ set "SHORTCUT_100=Windows Features|optionalfeatures"
 exit /b 0
 
 :done
-set "EXIT_CODE=0"
 call "%COMMON_LIB%" :Finalize %EXIT_CODE%
 echo.
 pause
