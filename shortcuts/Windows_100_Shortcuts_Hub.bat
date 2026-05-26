@@ -36,6 +36,7 @@ set "SEL="
 set /p "SEL=Select shortcut: "
 
 if "%SEL%"=="0" goto :done
+REM findstr treats space-separated patterns as OR: (1-99) OR (100)
 echo(%SEL%| findstr /r "^[1-9][0-9]?$ ^100$" >nul || goto :invalid
 set /a "NUM=%SEL%+0"
 
@@ -61,11 +62,7 @@ for /f "tokens=1* delims=|" %%A in ("!ENTRY!") do (
 )
 call "%COMMON_LIB%" :Print INFO "Opening !SC_NAME!"
 start "" !SC_CMD!
-if errorlevel 1 (
-  call "%COMMON_LIB%" :Print ERROR "Failed to request launch for !SC_NAME!."
-  exit /b 1
-)
-call "%COMMON_LIB%" :Print SUCCESS "Launch request sent for !SC_NAME!."
+call "%COMMON_LIB%" :Print INFO "Launch command issued for !SC_NAME!."
 exit /b 0
 
 :LoadShortcuts
