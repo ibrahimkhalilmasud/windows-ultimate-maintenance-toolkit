@@ -44,7 +44,9 @@ set /p "SEL=Select shortcut: "
 if "%SEL%"=="0" goto :done
 if /I "%SEL%"=="Q" goto :done
 if /I "%SEL%"=="X" goto :done
-echo(%SEL%| findstr /r "^[1-9]$ ^[1-9][0-9]$ ^100$" >nul || goto :invalid
+echo(%SEL%| findstr /r "^[0-9][0-9]*$" >nul || goto :invalid
+if %SEL% LSS 1 goto :invalid
+if %SEL% GTR 100 goto :invalid
 set "NUM=%SEL%"
 
 call :LaunchShortcut %NUM%
@@ -86,17 +88,21 @@ for /l %%I in (1,1,100) do (
   if not defined SHORTCUT_%%I (
     set "MISSING_SHORTCUTS=!MISSING_SHORTCUTS! %%I"
   ) else (
+    set "IS_UNSAFE=0"
     for /f "tokens=1* delims=|" %%A in ("!SHORTCUT_%%I!") do set "SCMD_CHECK=%%B"
-    if not defined SCMD_CHECK set "UNSAFE_SHORTCUTS=!UNSAFE_SHORTCUTS! %%I"
-    if not "!SCMD_CHECK:&=!"=="!SCMD_CHECK!" set "UNSAFE_SHORTCUTS=!UNSAFE_SHORTCUTS! %%I"
-    if not "!SCMD_CHECK:|=!"=="!SCMD_CHECK!" set "UNSAFE_SHORTCUTS=!UNSAFE_SHORTCUTS! %%I"
-    if not "!SCMD_CHECK:<=!"=="!SCMD_CHECK!" set "UNSAFE_SHORTCUTS=!UNSAFE_SHORTCUTS! %%I"
-    if not "!SCMD_CHECK:>=!"=="!SCMD_CHECK!" set "UNSAFE_SHORTCUTS=!UNSAFE_SHORTCUTS! %%I"
-    if not "!SCMD_CHECK:^=!"=="!SCMD_CHECK!" set "UNSAFE_SHORTCUTS=!UNSAFE_SHORTCUTS! %%I"
-    if not "!SCMD_CHECK:(=!"=="!SCMD_CHECK!" set "UNSAFE_SHORTCUTS=!UNSAFE_SHORTCUTS! %%I"
-    if not "!SCMD_CHECK:)=!"=="!SCMD_CHECK!" set "UNSAFE_SHORTCUTS=!UNSAFE_SHORTCUTS! %%I"
-    if not "!SCMD_CHECK:;=!"=="!SCMD_CHECK!" set "UNSAFE_SHORTCUTS=!UNSAFE_SHORTCUTS! %%I"
-    if not "!SCMD_CHECK:"=!"=="!SCMD_CHECK!" set "UNSAFE_SHORTCUTS=!UNSAFE_SHORTCUTS! %%I"
+    if not defined SCMD_CHECK set "IS_UNSAFE=1"
+    if not "!SCMD_CHECK:&=!"=="!SCMD_CHECK!" set "IS_UNSAFE=1"
+    if not "!SCMD_CHECK:|=!"=="!SCMD_CHECK!" set "IS_UNSAFE=1"
+    if not "!SCMD_CHECK:<=!"=="!SCMD_CHECK!" set "IS_UNSAFE=1"
+    if not "!SCMD_CHECK:>=!"=="!SCMD_CHECK!" set "IS_UNSAFE=1"
+    if not "!SCMD_CHECK:^=!"=="!SCMD_CHECK!" set "IS_UNSAFE=1"
+    if not "!SCMD_CHECK:(=!"=="!SCMD_CHECK!" set "IS_UNSAFE=1"
+    if not "!SCMD_CHECK:)=!"=="!SCMD_CHECK!" set "IS_UNSAFE=1"
+    if not "!SCMD_CHECK:;=!"=="!SCMD_CHECK!" set "IS_UNSAFE=1"
+    if not "!SCMD_CHECK:"=!"=="!SCMD_CHECK!" set "IS_UNSAFE=1"
+    if not "!SCMD_CHECK:'=!"=="!SCMD_CHECK!" set "IS_UNSAFE=1"
+    if not "!SCMD_CHECK:$=!"=="!SCMD_CHECK!" set "IS_UNSAFE=1"
+    if "!IS_UNSAFE!"=="1" set "UNSAFE_SHORTCUTS=!UNSAFE_SHORTCUTS! %%I"
   )
 )
 if defined MISSING_SHORTCUTS (
