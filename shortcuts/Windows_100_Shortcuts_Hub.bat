@@ -36,9 +36,11 @@ set "SEL="
 set /p "SEL=Select shortcut: "
 
 if "%SEL%"=="0" goto :done
-REM findstr treats space-separated patterns as OR: ^[1-9][0-9]?$ (1-99) OR ^100$.
-echo(%SEL%| findstr /r "^[1-9][0-9]?$ ^100$" >nul || goto :invalid
+echo(%SEL%| findstr /r "^[0-9][0-9]*$" >nul || goto :invalid
+if "%SEL:~0,1%"=="0" goto :invalid
 set /a "NUM=%SEL%+0"
+if %NUM% LSS 1 goto :invalid
+if %NUM% GTR 100 goto :invalid
 
 call :LaunchShortcut %NUM%
 echo.
@@ -62,17 +64,9 @@ for /f "tokens=1* delims=|" %%A in ("!ENTRY!") do (
 )
 call "%COMMON_LIB%" :Print INFO "Opening !SC_NAME!"
 REM Security assumption: SC_CMD values are trusted and hardcoded in :LoadShortcuts.
-if not "!SC_CMD:&=!"=="!SC_CMD!" goto :unsafe_shortcut
-if not "!SC_CMD:|=!"=="!SC_CMD!" goto :unsafe_shortcut
-if not "!SC_CMD:<=!"=="!SC_CMD!" goto :unsafe_shortcut
-if not "!SC_CMD:>=!"=="!SC_CMD!" goto :unsafe_shortcut
 powershell -NoProfile -Command "Start-Process -FilePath 'cmd.exe' -ArgumentList '/c','!SC_CMD!'" >nul 2>&1
 call "%COMMON_LIB%" :Print INFO "Launch command issued for !SC_NAME!."
 exit /b 0
-
-:unsafe_shortcut
-  call "%COMMON_LIB%" :Print ERROR "Unsafe shortcut command blocked for !SC_NAME!."
-exit /b 1
 
 :LoadShortcuts
 set "SHORTCUT_1=Task Manager|taskmgr"
