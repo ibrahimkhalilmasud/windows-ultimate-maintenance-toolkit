@@ -1,6 +1,5 @@
 # Windows Ultimate Maintenance Toolkit
 
-![Project Banner Placeholder](assets/banner.png)
 
 All-in-one Windows maintenance, repair, optimization, diagnostics, cleanup, and recovery toolkit for laptops and desktop PCs.
 
