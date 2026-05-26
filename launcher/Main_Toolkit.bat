@@ -32,6 +32,7 @@ echo [4] Diagnostics
 echo [5] Security
 echo [6] Backup
 echo [7] Network
+echo [8] Shortcut Tools
 echo [0] Exit
 echo ==========================================================
 set /p "CHOICE=Select a category: "
@@ -43,6 +44,7 @@ if "%CHOICE%"=="4" goto :category_diagnostics
 if "%CHOICE%"=="5" goto :category_security
 if "%CHOICE%"=="6" goto :category_backup
 if "%CHOICE%"=="7" goto :category_network
+if "%CHOICE%"=="8" goto :category_shortcuts
 if "%CHOICE%"=="0" goto :safe_exit
 
 call "%COMMON_LIB%" :Print WARN "Invalid selection. Please try again."
@@ -191,6 +193,16 @@ if "%C%"=="4" call :RunTool "network\Proxy_Remover.bat"
 if "%C%"=="5" call :RunTool "network\Network_Speed_Optimizer.bat"
 if "%C%"=="0" goto :menu
 goto :category_network
+
+:category_shortcuts
+cls
+echo =================== SHORTCUT TOOLS ====================
+echo [1] Windows_100_Shortcuts_Hub
+echo [0] Back
+set /p "C=Select tool: "
+if "%C%"=="1" call :RunTool "shortcuts\Windows_100_Shortcuts_Hub.bat"
+if "%C%"=="0" goto :menu
+goto :category_shortcuts
 
 :RunTool
 set "TARGET=%TOOLKIT_ROOT%\%~1"

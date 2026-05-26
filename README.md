@@ -23,6 +23,7 @@ This repository provides a modular, production-grade toolkit for Windows 10/11 a
 - Security
 - Backup
 - Network
+- Shortcut Tools (100 quick-launch utilities)
 
 ## Installation
 1. Clone or download the repository.
@@ -52,6 +53,7 @@ Main_Toolkit.bat
 ├── security/
 ├── drivers/
 ├── backup/
+├── shortcuts/
 ├── logs/
 ├── reports/
 ├── assets/
@@ -63,6 +65,7 @@ Main_Toolkit.bat
 - Run DNS repair: `network\DNS_Reset_Repair.bat`
 - Run system repair: `repair\System_Repair_Toolkit.bat`
 - Export diagnostics: `diagnostics\Full_PC_Diagnostics.bat`
+- Open 100 shortcut hub: `shortcuts\Windows_100_Shortcuts_Hub.bat`
 
 ## Security Notes
 - No permanent security disablement operations are included.
