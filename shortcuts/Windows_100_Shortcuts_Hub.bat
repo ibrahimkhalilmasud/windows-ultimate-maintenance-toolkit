@@ -36,8 +36,8 @@ set "SEL="
 set /p "SEL=Select shortcut: "
 
 if "%SEL%"=="0" goto :done
-set /a "NUM=%SEL%+0" >nul 2>&1
-if errorlevel 1 goto :invalid
+echo(%SEL%| findstr /r "^[0-9][0-9]*$" >nul || goto :invalid
+set /a "NUM=%SEL%+0"
 if %NUM% LSS 1 goto :invalid
 if %NUM% GTR 100 goto :invalid
 
@@ -62,7 +62,7 @@ for /f "tokens=1* delims=|" %%A in ("!ENTRY!") do (
   set "SC_CMD=%%B"
 )
 call "%COMMON_LIB%" :Print INFO "Opening !SC_NAME!"
-start "" !SC_CMD! >> "%LOG_FILE%" 2>&1
+start "" !SC_CMD!
 call "%COMMON_LIB%" :RecordResult "Open !SC_NAME!" %errorlevel%
 exit /b %errorlevel%
 
@@ -129,7 +129,7 @@ set "SHORTCUT_59=Startup Folder (All Users)|explorer shell:common startup"
 set "SHORTCUT_60=Downloads Folder|explorer shell:Downloads"
 set "SHORTCUT_61=Documents Folder|explorer shell:Personal"
 set "SHORTCUT_62=Pictures Folder|explorer shell:My Pictures"
-set "SHORTCUT_63=Videos Folder|explorer shell:My Video"
+set "SHORTCUT_63=Videos Folder|explorer %USERPROFILE%\Videos"
 set "SHORTCUT_64=Music Folder|explorer shell:My Music"
 set "SHORTCUT_65=Recycle Bin|explorer shell:RecycleBinFolder"
 set "SHORTCUT_66=Apps Folder|explorer shell:AppsFolder"
