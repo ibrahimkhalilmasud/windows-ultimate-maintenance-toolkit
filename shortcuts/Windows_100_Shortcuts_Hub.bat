@@ -66,7 +66,7 @@ if not "!SC_CMD:&=!"=="!SC_CMD!" goto :unsafe_shortcut
 if not "!SC_CMD:|=!"=="!SC_CMD!" goto :unsafe_shortcut
 if not "!SC_CMD:<=!"=="!SC_CMD!" goto :unsafe_shortcut
 if not "!SC_CMD:>=!"=="!SC_CMD!" goto :unsafe_shortcut
-start "" !SC_CMD!
+powershell -NoProfile -Command "Start-Process -FilePath 'cmd.exe' -ArgumentList '/c','!SC_CMD!'" >nul 2>&1
 call "%COMMON_LIB%" :Print INFO "Launch command issued for !SC_NAME!."
 exit /b 0
 
