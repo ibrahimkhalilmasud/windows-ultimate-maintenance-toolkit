@@ -18,13 +18,22 @@ if errorlevel 1 exit /b 0
 
 call "%COMMON_LIB%" :Print INFO "Starting Windows_100_Shortcuts_Hub"
 call :LoadShortcuts
+call :ValidateShortcuts
+if errorlevel 1 (
+  set "EXIT_CODE=1"
+  call "%COMMON_LIB%" :Finalize %EXIT_CODE%
+  echo.
+  pause
+  endlocal
+  exit /b %EXIT_CODE%
+)
 set "EXIT_CODE=0"
 
 :menu
 cls
 echo ================= WINDOWS 100 SHORTCUTS HUB =================
 echo Enter a number from 1-100 to open a shortcut tool.
-echo Enter 0 to return.
+echo Enter 0, Q, or X to return.
 echo.
 for /l %%I in (1,1,100) do (
   for /f "tokens=1* delims=|" %%A in ("!SHORTCUT_%%I!") do (
@@ -37,6 +46,8 @@ set "SEL="
 set /p "SEL=Select shortcut: "
 
 if "%SEL%"=="0" goto :done
+if /I "%SEL%"=="Q" goto :done
+if /I "%SEL%"=="X" goto :done
 echo(%SEL%| findstr /r "^[1-9][0-9]*$" >nul || goto :invalid
 set /a "NUM=%SEL%+0"
 if %NUM% LSS 1 goto :invalid
@@ -53,7 +64,7 @@ pause
 goto :menu
 
 :invalid
-call "%COMMON_LIB%" :Print WARN "Invalid selection. Choose 1-100 or 0."
+call "%COMMON_LIB%" :Print WARN "Invalid selection. Choose 1-100, or 0/Q/X to return."
 timeout /t 2 >nul
 goto :menu
 
@@ -70,7 +81,20 @@ for /f "tokens=1* delims=|" %%A in ("!ENTRY!") do (
 call "%COMMON_LIB%" :Print INFO "Opening !SC_NAME!"
 REM Security assumption: SC_CMD values are trusted and hardcoded in :LoadShortcuts.
 powershell -NoProfile -Command "Start-Process -FilePath 'cmd.exe' -ArgumentList '/c','!SC_CMD!'" >nul 2>&1
-call "%COMMON_LIB%" :Print INFO "Launch command issued for !SC_NAME!."
+set "LAUNCH_CODE=%errorlevel%"
+call "%COMMON_LIB%" :RecordResult "Launch !SC_NAME!" %LAUNCH_CODE%
+exit /b %LAUNCH_CODE%
+
+:ValidateShortcuts
+set "MISSING_SHORTCUTS="
+for /l %%I in (1,1,100) do (
+  if not defined SHORTCUT_%%I set "MISSING_SHORTCUTS=!MISSING_SHORTCUTS! %%I"
+)
+if defined MISSING_SHORTCUTS (
+  call "%COMMON_LIB%" :Print ERROR "Shortcut table is incomplete. Missing entries:!MISSING_SHORTCUTS!"
+  exit /b 1
+)
+call "%COMMON_LIB%" :Print INFO "Shortcut table integrity check passed (100/100)."
 exit /b 0
 
 :LoadShortcuts

@@ -7,7 +7,9 @@ Provides a centralized quick-launch menu for **100 built-in Windows shortcut too
 - Automatic admin elevation flow
 - Timestamped centralized logging in `logs/`
 - Result summary entry generation in `reports/`
+- Startup integrity validation for the 100-entry shortcut table
 - Input validation for safe menu selection
+- Quick exit aliases (`0`, `Q`, `X`)
 - One-menu access to Windows utilities, Control Panel applets, CLI diagnostics, and Settings pages
 
 ## Requirements
@@ -24,7 +26,7 @@ Provides a centralized quick-launch menu for **100 built-in Windows shortcut too
 - Console success/failure indicators
 - Script-specific `.log` file in `logs/`
 - Summary entry in `reports/`
-- Selected utility or settings page receives a launch request
+- Selected utility or settings page receives a launch request with logged launch result
 
 ## Warnings
 - This tool launches utilities only; review each utility before making changes.
