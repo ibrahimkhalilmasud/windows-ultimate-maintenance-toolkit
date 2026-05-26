@@ -89,8 +89,14 @@ for /l %%I in (1,1,100) do (
     for /f "tokens=1* delims=|" %%A in ("!SHORTCUT_%%I!") do set "SCMD_CHECK=%%B"
     if not defined SCMD_CHECK set "UNSAFE_SHORTCUTS=!UNSAFE_SHORTCUTS! %%I"
     if not "!SCMD_CHECK:&=!"=="!SCMD_CHECK!" set "UNSAFE_SHORTCUTS=!UNSAFE_SHORTCUTS! %%I"
+    if not "!SCMD_CHECK:|=!"=="!SCMD_CHECK!" set "UNSAFE_SHORTCUTS=!UNSAFE_SHORTCUTS! %%I"
+    if not "!SCMD_CHECK:<=!"=="!SCMD_CHECK!" set "UNSAFE_SHORTCUTS=!UNSAFE_SHORTCUTS! %%I"
+    if not "!SCMD_CHECK:>=!"=="!SCMD_CHECK!" set "UNSAFE_SHORTCUTS=!UNSAFE_SHORTCUTS! %%I"
+    if not "!SCMD_CHECK:^=!"=="!SCMD_CHECK!" set "UNSAFE_SHORTCUTS=!UNSAFE_SHORTCUTS! %%I"
+    if not "!SCMD_CHECK:(=!"=="!SCMD_CHECK!" set "UNSAFE_SHORTCUTS=!UNSAFE_SHORTCUTS! %%I"
+    if not "!SCMD_CHECK:)=!"=="!SCMD_CHECK!" set "UNSAFE_SHORTCUTS=!UNSAFE_SHORTCUTS! %%I"
     if not "!SCMD_CHECK:;=!"=="!SCMD_CHECK!" set "UNSAFE_SHORTCUTS=!UNSAFE_SHORTCUTS! %%I"
-    if not "!SCMD_CHECK:\"=!"=="!SCMD_CHECK!" set "UNSAFE_SHORTCUTS=!UNSAFE_SHORTCUTS! %%I"
+    if not "!SCMD_CHECK:"=!"=="!SCMD_CHECK!" set "UNSAFE_SHORTCUTS=!UNSAFE_SHORTCUTS! %%I"
   )
 )
 if defined MISSING_SHORTCUTS (
