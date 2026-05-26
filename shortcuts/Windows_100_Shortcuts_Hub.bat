@@ -66,7 +66,7 @@ goto :menu
 :LaunchShortcut
 set "ENTRY=!SHORTCUT_%~1!"
 if not defined ENTRY (
-  call "%COMMON_LIB%" :Print ERROR "Internal error: Shortcut %~1 is not configured in the shortcut table."
+  call "%COMMON_LIB%" :Print ERROR "Internal configuration error: Shortcut %~1 is missing or incorrectly named in the shortcut table."
   exit /b 1
 )
 for /f "tokens=1* delims=|" %%A in ("!ENTRY!") do (
@@ -101,7 +101,6 @@ for /l %%I in (1,1,100) do (
     if not "!SCMD_CHECK:;=!"=="!SCMD_CHECK!" set "IS_UNSAFE=1"
     if not "!SCMD_CHECK:"=!"=="!SCMD_CHECK!" set "IS_UNSAFE=1"
     if not "!SCMD_CHECK:'=!"=="!SCMD_CHECK!" set "IS_UNSAFE=1"
-    if not "!SCMD_CHECK:$=!"=="!SCMD_CHECK!" set "IS_UNSAFE=1"
     if "!IS_UNSAFE!"=="1" set "UNSAFE_SHORTCUTS=!UNSAFE_SHORTCUTS! %%I"
   )
 )
