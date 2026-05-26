@@ -36,9 +36,6 @@ Provides a centralized quick-launch menu for **100 built-in Windows shortcut too
 - If a shortcut does not open, verify the utility is available on your Windows edition.
 - If a Settings URI fails, ensure you are on a supported Windows build.
 
-## Screenshot Placeholder
-![Windows_100_Shortcuts_Hub Screenshot Placeholder](../../assets/Windows_100_Shortcuts_Hub.png)
-
 ## FAQ
 ### Does this script perform maintenance actions directly?
 No. It only launches built-in tools and settings pages.

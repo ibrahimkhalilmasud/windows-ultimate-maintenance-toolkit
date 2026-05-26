@@ -36,7 +36,7 @@ set "SEL="
 set /p "SEL=Select shortcut: "
 
 if "%SEL%"=="0" goto :done
-REM findstr treats space-separated patterns as OR: (1-99) OR (100)
+REM findstr treats space-separated patterns as OR: ^[1-9][0-9]?$ (1-99) OR ^100$.
 echo(%SEL%| findstr /r "^[1-9][0-9]?$ ^100$" >nul || goto :invalid
 set /a "NUM=%SEL%+0"
 
@@ -62,9 +62,17 @@ for /f "tokens=1* delims=|" %%A in ("!ENTRY!") do (
 )
 call "%COMMON_LIB%" :Print INFO "Opening !SC_NAME!"
 REM Security assumption: SC_CMD values are trusted and hardcoded in :LoadShortcuts.
+if not "!SC_CMD:&=!"=="!SC_CMD!" goto :unsafe_shortcut
+if not "!SC_CMD:|=!"=="!SC_CMD!" goto :unsafe_shortcut
+if not "!SC_CMD:<=!"=="!SC_CMD!" goto :unsafe_shortcut
+if not "!SC_CMD:>=!"=="!SC_CMD!" goto :unsafe_shortcut
 start "" !SC_CMD!
 call "%COMMON_LIB%" :Print INFO "Launch command issued for !SC_NAME!."
 exit /b 0
+
+:unsafe_shortcut
+  call "%COMMON_LIB%" :Print ERROR "Unsafe shortcut command blocked for !SC_NAME!."
+exit /b 1
 
 :LoadShortcuts
 set "SHORTCUT_1=Task Manager|taskmgr"
