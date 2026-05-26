@@ -44,16 +44,13 @@ set /p "SEL=Select shortcut: "
 if "%SEL%"=="0" goto :done
 if /I "%SEL%"=="Q" goto :done
 if /I "%SEL%"=="X" goto :done
-echo(%SEL%| findstr /r "^[1-9][0-9]*$" >nul || goto :invalid
-set /a "NUM=%SEL%+0"
-if %NUM% LSS 1 goto :invalid
-if %NUM% GTR 100 goto :invalid
+echo(%SEL%| findstr /r "^[1-9]$ ^[1-9][0-9]$ ^100$" >nul || goto :invalid
+set "NUM=%SEL%"
 
 call :LaunchShortcut %NUM%
-set "LAST_CODE=%errorlevel%"
-if not "%LAST_CODE%"=="0" (
+if errorlevel 1 (
   set "EXIT_CODE=1"
-  call "%COMMON_LIB%" :Print ERROR "Shortcut launch request failed."
+  call "%COMMON_LIB%" :Print ERROR "Shortcut launch request failed. Check %LOG_FILE% for details."
 )
 echo.
 pause
@@ -77,7 +74,7 @@ for /f "tokens=1* delims=|" %%A in ("!ENTRY!") do (
 call "%COMMON_LIB%" :Print INFO "Opening !SC_NAME!"
 REM Use PowerShell wrapper so commands with arguments/spaces launch consistently from menu entries.
 REM Security assumption: SC_CMD values are trusted and hardcoded in :LoadShortcuts.
-powershell -NoProfile -Command "Start-Process -FilePath 'cmd.exe' -ArgumentList '/c','!SC_CMD!'" >nul 2>&1
+powershell -NoProfile -Command "Start-Process -FilePath 'cmd.exe' -ArgumentList '/c','!SC_CMD!'" >> "%LOG_FILE%" 2>&1
 set "LAUNCH_CODE=%errorlevel%"
 call "%COMMON_LIB%" :RecordResult "Launch !SC_NAME!" %LAUNCH_CODE%
 exit /b %LAUNCH_CODE%

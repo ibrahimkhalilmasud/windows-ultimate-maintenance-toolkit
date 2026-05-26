@@ -35,6 +35,7 @@ Provides a centralized quick-launch menu for **100 built-in Windows shortcut too
 
 ## Troubleshooting
 - If elevation fails, manually run as Administrator.
+- If launch fails, review the tool-specific `.log` file in `logs/` for PowerShell/start-process details.
 - If a shortcut does not open, verify the utility is available on your Windows edition.
 - If a Settings URI fails, ensure you are on a supported Windows build.
 
