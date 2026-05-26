@@ -21,11 +21,7 @@ call :LoadShortcuts
 call :ValidateShortcuts
 if errorlevel 1 (
   set "EXIT_CODE=1"
-  call "%COMMON_LIB%" :Finalize %EXIT_CODE%
-  echo.
-  pause
-  endlocal
-  exit /b %EXIT_CODE%
+  goto :done
 )
 set "EXIT_CODE=0"
 
@@ -79,6 +75,7 @@ for /f "tokens=1* delims=|" %%A in ("!ENTRY!") do (
   set "SC_CMD=%%B"
 )
 call "%COMMON_LIB%" :Print INFO "Opening !SC_NAME!"
+REM Use PowerShell wrapper so commands with arguments/spaces launch consistently from menu entries.
 REM Security assumption: SC_CMD values are trusted and hardcoded in :LoadShortcuts.
 powershell -NoProfile -Command "Start-Process -FilePath 'cmd.exe' -ArgumentList '/c','!SC_CMD!'" >nul 2>&1
 set "LAUNCH_CODE=%errorlevel%"
